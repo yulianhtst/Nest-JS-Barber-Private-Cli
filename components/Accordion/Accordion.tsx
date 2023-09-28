@@ -2,9 +2,13 @@ import * as React from 'react';
 import { AccordionItem } from './AccordionItem/AccordionItem';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { getAllDates } from '@/services/getAllDates';
+
+
 
 export default function BasicAccordion() {
   const [weeks, setWeeks] = useState<Date[]>([])
+  const [reserved, setReserved] = useState<any>([])
 
   useEffect(() => {
     const arrayOfDates: Date[] = [];
@@ -18,11 +22,26 @@ export default function BasicAccordion() {
     setWeeks(arrayOfDates)
   }, [])
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getAllDates();
+        setReserved(res)
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    )()
+    console.log({
+      reserved,
+      weeks
+    });
+  }, [])
 
-  console.log(weeks);
+  
   return (
     <>
-      {weeks.map((date, index) => (<AccordionItem date={date} />))}
+      {weeks.map((date) => (<AccordionItem key={date.toString()} date={date} workingDays={reserved} />))}
     </>
   );
-}
+};
