@@ -3,6 +3,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { green, yellow } from "@mui/material/colors";
 import { getAllDates } from "@/services/getAllDates";
 import { useEffect, useState } from "react";
+import { postDayOff } from "@/services/postDayOff";
 
 interface AccordionProps {
     date: Date
@@ -25,7 +26,7 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) =
 
 
 
-    const onClickHandler = async () => {
+    const onAccordionOpenClickHandler = async () => {
         const allDates = await getAllDates()
 
         const reservedDates = allDates.filter((x: any) => {
@@ -37,11 +38,20 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) =
         setReserved(reservedDates)
     }
 
+    const onButtonClickHandler = async () => {
+        try {
+            const restDay = await postDayOff(date)
+            console.log(restDay);
+
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     return (
         <Accordion>
             <AccordionSummary
-                onClick={onClickHandler}
+                onClick={onAccordionOpenClickHandler}
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
@@ -85,7 +95,7 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) =
 
                     }
 
-                    < Button variant="contained" color="error" sx={{ ml: 'auto', height: '3rem', alignSelf: 'end' }}>Day OFF</Button>
+                    < Button onClick={onButtonClickHandler} variant="contained" color="error" sx={{ ml: 'auto', height: '3rem', alignSelf: 'end' }}>Day OFF</Button>
                 </Box>
             </AccordionDetails>
         </Accordion >

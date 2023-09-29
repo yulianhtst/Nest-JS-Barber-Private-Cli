@@ -9,11 +9,6 @@ import { getAllDates } from '@/services/getAllDates';
 export default function BasicAccordion() {
     const [weeks, setWeeks] = useState<Date[]>([])
     const [reserved, setReserved] = useState<any>([])
-    const day: Date = new Date()
-
-    console.log(new Date(day.setDate(day.getDate() + 10)));
-
-
 
     useEffect(() => {
         const arrayOfDates: Date[] = [];
