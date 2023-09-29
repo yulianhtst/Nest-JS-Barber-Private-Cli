@@ -1,6 +1,8 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Typography } from "@mui/material"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { green, yellow } from "@mui/material/colors";
+import { getAllDates } from "@/services/getAllDates";
+import { useEffect, useState } from "react";
 
 interface AccordionProps {
     date: Date
@@ -8,17 +10,38 @@ interface AccordionProps {
 }
 
 export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) => {
+    const [reserved, setReserved] = useState<any>([])
     const currentDate = date.toString().substring(4, 16)
-    const reserved = workingDays.filter(x => {
-        const reservedDate = new Date(x.date).toString().substring(4, 16)
 
-        return currentDate == reservedDate
-    })
+
+    useEffect(() => {
+        setReserved(
+            workingDays.filter(x => {
+                const reservedDate = new Date(x.date).toString().substring(4, 16)
+                return currentDate === reservedDate
+            }))
+    }, [workingDays])
+
+
+
+
+    const onClickHandler = async () => {
+        const allDates = await getAllDates()
+
+        const reservedDates = allDates.filter((x: any) => {
+            const reservedDate = new Date(x.date).toString().substring(4, 16)
+
+            return currentDate === reservedDate
+        })
+
+        setReserved(reservedDates)
+    }
 
 
     return (
         <Accordion>
             <AccordionSummary
+                onClick={onClickHandler}
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
@@ -32,18 +55,40 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) =
                 <Typography >{currentDate}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <Box display="flex">
-                    <Box>
-                        {
-                            reserved.length
-                                ? reserved.map(reserv => <Typography >{reserv.date.slice(11, 16) + ' ' + reserv.name + ' ' + reserv.services}</Typography>)
-                                : <Typography>There is no reservations</Typography>
-                        }
+                <Box display="flex" gap="1rem" flexWrap='wrap'>
+                    {
+                        Boolean(reserved.length) &&
+                        <>
+                            <Box display="flex" flexDirection="column">
+                                <Typography fontWeight="bold">Name:</Typography>
+                                <Typography fontWeight="bold">Number:</Typography>
+                                <Typography fontWeight="bold">Time:</Typography>
+                                <Typography fontWeight="bold">Services</Typography>
+                            </Box>
+                            <hr />
+                        </>
+                    }
+                    {
+                        Boolean(reserved.length)
+                            ? reserved.map((reserv: any) =>
+                                <>
+                                    <Box display="flex" flexDirection="column">
+                                        <Typography>{reserv.name}</Typography>
+                                        <Typography>{reserv.number}</Typography>
+                                        <Typography>{reserv.date.slice(11, 16)}</Typography>
+                                        <Typography>{reserv.services}</Typography>
+                                    </Box>
+                                    <hr />
+                                </>
+                            )
+                            : <Typography>There is no reservations</Typography>
 
-                    </Box>
-                    <Button variant="contained" color="error" sx={{ ml: 'auto', height: '3rem',alignSelf:'end' }}>Day OFF</Button>
+                    }
+
+                    < Button variant="contained" color="error" sx={{ ml: 'auto', height: '3rem', alignSelf: 'end' }}>Day OFF</Button>
                 </Box>
             </AccordionDetails>
-        </Accordion>
+        </Accordion >
+
     )
 }
