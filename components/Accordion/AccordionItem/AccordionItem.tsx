@@ -24,6 +24,7 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
 
     const [reserved, setReserved] = useState<any>([])
     const [dayoff, setDayoff] = useState(false)
+    const [dayId, setDayId] = useState(null)
     const currentDate = date.toString().substring(4, 16)
 
     useEffect(() => {
@@ -33,9 +34,6 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
                 return currentDate === reservedDate
             }))
     }, [bookedDays, currentDate])
-
-
-
 
     const onAccordionOpenClickHandler = async () => {
         const allBookedDates = await bookedDates()
@@ -49,23 +47,46 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
         setReserved(reservedDates)
     }
 
+    useEffect(() => {
+        const d = databaseDates?.find(x => {
+            const dbDate = x.date.slice(0, 10)
+            const accordionItemDate = new Date(date).toISOString().slice(0, 10)
+            return dbDate === accordionItemDate
+        })
+        if (d) {
+            setDayId(d._id)
+            setDayoff(true)
+        } else {
+            setDayoff(false)
+            return;
+        }
+        // d ? setDayoff(true) : setDayoff(false)
+    }, [databaseDates])
+
     const onButtonClickHandler = async () => {
 
         const sentDate = { date: new Date(date) }
         const restDay = await postDayOff(sentDate)
 
-        let count = 0
         const d = databaseDates.find(x => {
             const dbDate = x.date.slice(0, 10)
             const accordionItemDate = new Date(date).toISOString().slice(0, 10)
-            count++
             return dbDate === accordionItemDate
         })
+        if (restDay._id) {
+            setDayId(restDay._id)
+        }
+
+        if (!restDay._id) {
+            console.log('DELETE', dayId);
+            deleteDate(dayId)
+        }
+
+
         mutate()
 
-        restDay.error ? setDayoff(true) : setDayoff(false)
-
-        console.log(count, 'Брой почивни дати');
+        // restDay.error ? setDayoff(true) : setDayoff(false)
+        console.log(restDay, 'restday');
         console.log(d, 'Резултата от търсенето в масива с почивни дни');
         console.log(restDay, 'Създаване на дата ');
     }
@@ -117,7 +138,7 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
 
                     }
 
-                    < Button onClick={onButtonClickHandler} variant="contained" sx={{ bgcolor: dayoff ? 'grey' : 'red', ml: 'auto', height: '3rem', alignSelf: 'end' }}>Day OFF</Button>
+                    < Button onClick={onButtonClickHandler} variant="contained" sx={{ bgcolor: dayoff ? 'grey' : 'red', ml: 'auto', height: '3rem', alignSelf: 'end', "&:hover": { bgcolor: dayoff ? 'red' : 'grey' } }}>Day OFF</Button>
                 </Box>
             </AccordionDetails>
         </Accordion >
