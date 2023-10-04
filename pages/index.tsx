@@ -2,28 +2,20 @@ import BasicAccordion from "@/components/Accordion/Accordion"
 import { API_URL } from "@/constants";
 import { Box } from '@mui/material';
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
 
-  const [datesResponse, date1Response] = await Promise.all([
-    fetch(API_URL + "dates"),
-    fetch(API_URL + 'dates/1')
-  ]);
+  const datesResponse = await fetch(API_URL + "dates")
 
-  const [datesJson, date1Json] = await Promise.all([
-    datesResponse.json(),
-    date1Response.json()
-  ]);
+  const datesJson = await datesResponse.json()
 
   const generatedDates = datesJson.map((x) => new Date(x).toString());
 
   return {
-    props: { generatedDates, databaseDates: date1Json }
+    props: { generatedDates }
   };
 }
 
-export default function Home({ generatedDates, databaseDates }) {
-  console.log(generatedDates);
-  console.log(databaseDates);
+export default function Home({ generatedDates }) {
 
 
   return (
@@ -36,7 +28,7 @@ export default function Home({ generatedDates, databaseDates }) {
       },
       m: '0 auto',
     }}>
-      <BasicAccordion tenGeneratedDates={generatedDates} databaseDates={databaseDates} />
+      <BasicAccordion tenGeneratedDates={generatedDates} />
     </Box>
   )
 }

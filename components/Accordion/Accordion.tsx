@@ -10,7 +10,6 @@ export default function BasicAccordion({ tenGeneratedDates }) {
     const [booked, setBooked] = useState<any>([])
 
 
-
     useEffect(() => {
         (async () => {
             try {

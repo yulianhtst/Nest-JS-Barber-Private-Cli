@@ -23,7 +23,8 @@
     "react-dom": "^18.2.0",
     "react-modal": "^3.16.1",
     "react-swipeable-views-utils": "^0.14.0",
-    "styled-components": "^5.3.11"
+    "styled-components": "^5.3.11",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
     "@types/node": "latest",

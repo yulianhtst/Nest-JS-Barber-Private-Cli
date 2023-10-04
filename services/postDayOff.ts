@@ -8,7 +8,6 @@ export const postDayOff = async (date: object) => {
     },
     body: JSON.stringify(date),
   };
-  console.log(options);
 
   const response = await fetch(API_URL + "dates", options);
   const responseJson = await response.json();
