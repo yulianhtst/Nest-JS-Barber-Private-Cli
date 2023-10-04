@@ -1,14 +1,16 @@
 import { API_URL } from "@/constants";
 
-export const postDayOff = async (data: Date) => {
+export const postDayOff = async (date: object) => {
   const options = {
-    method: "post",
+    method: "POST",
     headers: {
-      "Content-Type": "application/json",
+            "Content-Type": "application/json"
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(date),
   };
-  const response = await fetch(API_URL, options);
+  console.log(options);
+
+  const response = await fetch(API_URL + "dates", options);
   const responseJson = await response.json();
   return responseJson;
 };

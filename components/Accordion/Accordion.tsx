@@ -2,33 +2,20 @@ import * as React from 'react';
 import { AccordionItem } from './AccordionItem/AccordionItem';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { getAllDates } from '@/services/getAllDates';
+import { bookedDates } from '@/services/getBookedDates';
 
 
 
-export default function BasicAccordion() {
-    const [weeks, setWeeks] = useState<Date[]>([])
-    const [reserved, setReserved] = useState<any>([])
+export default function BasicAccordion({ tenGeneratedDates }) {
+    const [booked, setBooked] = useState<any>([])
 
-    useEffect(() => {
-        const arrayOfDates: Date[] = [];
 
-        for (let i = 0; i < 10; i++) {
-            const day: Date = new Date()
-
-            let result = new Date(day.setDate(day.getDate() + i));
-
-            arrayOfDates.push(result)
-        }
-
-        setWeeks(arrayOfDates)
-    }, [])
 
     useEffect(() => {
         (async () => {
             try {
-                const res = await getAllDates();
-                setReserved(res)
+                const res = await bookedDates();
+                setBooked(res)
             } catch (error) {
                 console.error(error);
             }
@@ -39,7 +26,7 @@ export default function BasicAccordion() {
 
     return (
         <>
-            {weeks.map((date) => (<AccordionItem key={date.toString()} date={date} workingDays={reserved} />))}
+            {tenGeneratedDates.map((date) => (<AccordionItem key={date.toString()} date={date} bookedDays={booked} />))}
         </>
     );
 };

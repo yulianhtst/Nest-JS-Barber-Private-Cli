@@ -1,35 +1,37 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Typography } from "@mui/material"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { green, yellow } from "@mui/material/colors";
-import { getAllDates } from "@/services/getAllDates";
 import { useEffect, useState } from "react";
 import { postDayOff } from "@/services/postDayOff";
+import { deleteDate } from "@/services/deleteDate";
+import { bookedDates } from "@/services/getBookedDates";
 
 interface AccordionProps {
     date: Date
-    workingDays: [any]
+    bookedDays: [any]
 }
 
-export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) => {
+export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) => {
     const [reserved, setReserved] = useState<any>([])
+    const [dayoff, setDayoff] = useState(false)
     const currentDate = date.toString().substring(4, 16)
 
 
     useEffect(() => {
         setReserved(
-            workingDays.filter(x => {
+            bookedDays.filter(x => {
                 const reservedDate = new Date(x.date).toString().substring(4, 16)
                 return currentDate === reservedDate
             }))
-    }, [workingDays])
+    }, [bookedDays])
 
 
 
 
     const onAccordionOpenClickHandler = async () => {
-        const allDates = await getAllDates()
+        const allBookedDates = await bookedDates()
 
-        const reservedDates = allDates.filter((x: any) => {
+        const reservedDates = allBookedDates.filter((x: any) => {
             const reservedDate = new Date(x.date).toString().substring(4, 16)
 
             return currentDate === reservedDate
@@ -40,8 +42,18 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, workingDays }) =
 
     const onButtonClickHandler = async () => {
         try {
-            const restDay = await postDayOff(date)
-            console.log(restDay);
+            if (!dayoff) {
+
+                const sentDate = { date: new Date(date) }
+                const restDay = await postDayOff(sentDate)
+                console.log(restDay);
+
+
+                restDay.date && setDayoff(true)
+                restDay.error && setDayoff(false)
+            } else if (dayoff) {
+                // deleteDate(date._id)
+            }
 
         } catch (error) {
             console.error(error)
