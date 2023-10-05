@@ -4,7 +4,9 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { bookedDates } from '@/services/getBookedDates';
 
-
+interface AccordionProps {
+    tenGeneratedDates: string[];
+}
 
 export default function BasicAccordion({ tenGeneratedDates }) {
     const [booked, setBooked] = useState<any>([])
@@ -14,7 +16,8 @@ export default function BasicAccordion({ tenGeneratedDates }) {
         (async () => {
             try {
                 const res = await bookedDates();
-                setBooked(res)
+                const mappedRes = res.map(d => Object.assign(d, { date: new Date(d.date).toString().substring(4, 16) }))
+                setBooked(mappedRes)
             } catch (error) {
                 console.error(error);
             }
@@ -25,7 +28,7 @@ export default function BasicAccordion({ tenGeneratedDates }) {
 
     return (
         <>
-            {tenGeneratedDates.map((date) => (<AccordionItem key={date.toString()} date={date} bookedDays={booked} />))}
+            {tenGeneratedDates.map((date: string) => (<AccordionItem key={date.toString()} date={date} bookedDays={booked} />))}
         </>
     );
 };

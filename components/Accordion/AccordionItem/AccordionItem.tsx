@@ -1,6 +1,5 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Typography } from "@mui/material"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { green, yellow } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import { postDayOff } from "@/services/postDayOff";
 import { deleteDate } from "@/services/deleteDate";
@@ -8,10 +7,6 @@ import { bookedDates } from "@/services/getBookedDates";
 import { API_URL } from "@/constants";
 import useSWR from "swr";
 
-interface AccordionProps {
-    date: Date
-    bookedDays: [any]
-}
 
 const fetcher = async () => {
     const response = await fetch(API_URL + 'dates/1')
@@ -19,48 +14,49 @@ const fetcher = async () => {
     return data
 }
 
-export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) => {
+export const AccordionItem = ({ date, bookedDays }) => {
     const { data: databaseDates, error, isValidating, mutate } = useSWR('dates', fetcher)
 
+
+    console.log(date);
+
     const [reserved, setReserved] = useState<any>([])
-    const [dayoff, setDayoff] = useState(false)
-    const [dayId, setDayId] = useState(null)
-    const currentDate = date.toString().substring(4, 16)
+    const [dayoff, setDayoff] = useState<boolean>(false)
+    const [dayId, setDayId] = useState<string | null>(null)
 
     useEffect(() => {
         setReserved(
-            bookedDays.filter(x => {
-                const reservedDate = new Date(x.date).toString().substring(4, 16)
-                return currentDate === reservedDate
+            bookedDays.filter((day: { date: string }) => {
+
+                return date === day.date
             }))
-    }, [bookedDays, currentDate])
+    }, [bookedDays, date])
 
     const onAccordionOpenClickHandler = async () => {
         const allBookedDates = await bookedDates()
 
-        const reservedDates = allBookedDates.filter((x: any) => {
-            const reservedDate = new Date(x.date).toString().substring(4, 16)
+        const reservedDates = allBookedDates.filter((bookedDate: { date: string }) => {
+            const reservedDate = new Date(bookedDate.date).toString().substring(4, 16)
 
-            return currentDate === reservedDate
+            return date === reservedDate
         })
 
         setReserved(reservedDates)
     }
 
     useEffect(() => {
-        const d = databaseDates?.find(x => {
-            const dbDate = x.date.slice(0, 10)
+        const foundDate = databaseDates?.find((day: { date: string }) => {
+            const dbDate = day.date.slice(0, 10)
             const accordionItemDate = new Date(date).toISOString().slice(0, 10)
             return dbDate === accordionItemDate
         })
-        if (d) {
-            setDayId(d._id)
+        if (foundDate) {
+            setDayId(foundDate._id)
             setDayoff(true)
         } else {
             setDayoff(false)
             return;
         }
-        // d ? setDayoff(true) : setDayoff(false)
     }, [databaseDates])
 
     const onButtonClickHandler = async () => {
@@ -68,27 +64,15 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
         const sentDate = { date: new Date(date) }
         const restDay = await postDayOff(sentDate)
 
-        const d = databaseDates.find(x => {
-            const dbDate = x.date.slice(0, 10)
-            const accordionItemDate = new Date(date).toISOString().slice(0, 10)
-            return dbDate === accordionItemDate
-        })
         if (restDay._id) {
             setDayId(restDay._id)
         }
 
         if (!restDay._id) {
-            console.log('DELETE', dayId);
             deleteDate(dayId)
         }
 
-
         mutate()
-
-        // restDay.error ? setDayoff(true) : setDayoff(false)
-        console.log(restDay, 'restday');
-        console.log(d, 'Резултата от търсенето в масива с почивни дни');
-        console.log(restDay, 'Създаване на дата ');
     }
 
     return (
@@ -105,7 +89,7 @@ export const AccordionItem: React.FC<AccordionProps> = ({ date, bookedDays }) =>
                     ...(reserved.length == 0 && { backgroundColor: 'white' }),
                 }}
             >
-                <Typography >{currentDate}</Typography>
+                <Typography >{date}</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Box display="flex" gap="1rem" flexWrap='wrap'>

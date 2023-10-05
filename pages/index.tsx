@@ -1,22 +1,24 @@
 import BasicAccordion from "@/components/Accordion/Accordion"
 import { API_URL } from "@/constants";
 import { Box } from '@mui/material';
+import { GetServerSideProps } from "next";
 
-export async function getServerSideProps() {
 
-  const datesResponse = await fetch(API_URL + "dates")
 
-  const datesJson = await datesResponse.json()
+export const getServerSideProps = async () => {
 
-  const generatedDates = datesJson.map((x) => new Date(x).toString());
+  const res = await fetch(API_URL + "dates")
+
+  const generatedDates = await res.json()
+
+  // const generatedDates = generatedDates.map((x) => new Date(x).toString());
 
   return {
     props: { generatedDates }
-  };
+  }
 }
 
 export default function Home({ generatedDates }) {
-
 
   return (
     <Box sx={{
